@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef USE_ECONF
-#include <libeconf.h>
+#include "pam_econf.h"
 #endif
 
 #include <security/pam_modules.h>
@@ -241,25 +241,8 @@ econf_read_file(const pam_handle_t *pamh, const char *filename, const char *deli
 	}
       }
 
-#ifdef HAVE_ECONF_READCONFIG
-      char *parsing_dirs = NULL;
-      D(("Read configuration from directory %s /run and %s", sysconf_dir, vendor_dir));
-      if (asprintf(&parsing_dirs, "PARSING_DIRS=%s:/run:%s", vendor_dir, sysconf_dir) < 0) {
-        pam_syslog(pamh, LOG_ERR, "Cannot allocate memory.");
-        parsing_dirs = NULL;
-        error = ECONF_NOMEM;
-      }
-      if (error == ECONF_SUCCESS)
-        error = econf_newKeyFile_with_options(&key_file, parsing_dirs);
-      if (error == ECONF_SUCCESS)
-        error = econf_readConfig (&key_file, NULL, vendor_dir, name, suffix,
-				  delim, "#");
-      free(parsing_dirs);
-#else
-      D(("Read configuration from directory %s and %s", vendor_dir, sysconf_dir));
-      error = econf_readDirs (&key_file, vendor_dir, sysconf_dir, name, suffix,
-			      delim, "#");
-#endif
+      error = pam_econf_readconfig (&key_file, vendor_dir, sysconf_dir, name, suffix,
+				    delim, "#", NULL, NULL);
       free(vendor_dir);
       free(sysconf_dir);
       if (error != ECONF_SUCCESS) {

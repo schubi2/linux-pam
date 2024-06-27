@@ -19,7 +19,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #if defined (USE_ECONF)	&& defined (VENDORDIR)
-#include <libeconf.h>
+#include "pam_econf.h"
 #endif
 
 #include <security/pam_modules.h>
@@ -83,35 +83,14 @@ static int perform_check(pam_handle_t *pamh)
     char **keys;
     econf_file *key_file = NULL;
 
-#ifdef HAVE_ECONF_READCONFIG
-    char *parsing_dirs = NULL;
-    if (asprintf(&parsing_dirs, "PARSING_DIRS=%s:/run:%s", VENDORDIR, ETCDIR) < 0) {
-	pam_syslog(pamh, LOG_ERR, "Cannot allocate memory.");
-        error = ECONF_NOMEM;
-        parsing_dirs = NULL;
-    }
-    if (error == ECONF_SUCCESS)
-        error = econf_newKeyFile_with_options(&key_file, parsing_dirs);
-    if (error == ECONF_SUCCESS)
-        error = econf_readConfigWithCallback(&key_file,
-					     NULL,
-					     VENDORDIR,
-					     SHELLS,
-					     NULL,
-					     "", /* key only */
-					     "#", /* comment */
-					     check_file, pamh);
-    free(parsing_dirs);
-#else
-    error = econf_readDirsWithCallback(&key_file,
-				       VENDORDIR,
-				       ETCDIR,
-				       SHELLS,
-				       NULL,
-				       "", /* key only */
-				       "#", /* comment */
-				       check_file, pamh);
-#endif
+    error = pam_econf_readconfig(&key_file,
+				 VENDORDIR,
+				 ETCDIR,
+				 SHELLS,
+				 NULL,
+				 "", /* key only */
+				 "#", /* comment */
+				 check_file, pamh);
     if (error) {
 	pam_syslog(pamh, LOG_ERR,
 		   "Cannot parse shell files: %s",

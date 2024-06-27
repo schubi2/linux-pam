@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #ifdef USE_ECONF
-#include <libeconf.h>
+#include "pam_econf.h"
 #endif
 
 #ifdef USE_ECONF
@@ -31,22 +31,8 @@ econf_search_key (const char *name, const char *suffix, const char *key)
 	char *val;
 	econf_err error = ECONF_SUCCESS;
 
-#ifdef HAVE_ECONF_READCONFIG
-	char *parsing_dirs = NULL;
-        if (asprintf(&parsing_dirs, "PARSING_DIRS=%s:/run:%s", VENDORDIR, SYSCONFDIR) < 0) {
-                error = ECONF_NOMEM;
-                parsing_dirs = NULL;
-	}
-        if (error == ECONF_SUCCESS)
-                error = econf_newKeyFile_with_options(&key_file, parsing_dirs);
-        if (error == ECONF_SUCCESS)
-                error = econf_readConfig (&key_file, NULL, VENDORDIR, name, suffix,
-					  " \t", "#");
-	free(parsing_dirs);
-#else
-	error = econf_readDirs (&key_file, VENDORDIR, SYSCONFDIR, name, suffix,
-				" \t", "#");
-#endif
+	error = pam_econf_readconfig (&key_file, VENDORDIR, SYSCONFDIR, name, suffix,
+				" \t", "#", NULL, NULL);
 	if (error != ECONF_SUCCESS) {
                 econf_free (key_file);
                 return NULL;
