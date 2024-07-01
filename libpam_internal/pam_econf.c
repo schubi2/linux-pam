@@ -17,11 +17,9 @@ econf_err pam_econf_readconfig(econf_file **key_file,
 {
     econf_err ret = ECONF_SUCCESS;
 #ifdef HAVE_ECONF_READCONFIG
-    /* Entries in director /run will be also parsed like it is described in           */
-    /* https://uapi-group.org/specifications/specs/configuration_files_specification/ */
-    D(("Read configuration from directory %s /run and %s", etc_conf_dir, usr_conf_dir));
+    D(("Read configuration from directory %s and %s", etc_conf_dir, usr_conf_dir));
     char *parsing_dirs = NULL;
-    if (asprintf(&parsing_dirs, "PARSING_DIRS=%s:/run:%s", usr_conf_dir, etc_conf_dir) < 0) {
+    if (asprintf(&parsing_dirs, "PARSING_DIRS=%s:%s", usr_conf_dir, etc_conf_dir) < 0) {
         ret = ECONF_NOMEM;
         parsing_dirs = NULL;
     }
