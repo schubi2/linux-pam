@@ -582,6 +582,8 @@ if test "$WITH_ECONF" = "check" || test "$WITH_ECONF" = "yes"; then
   AC_MSG_CHECKING(for econf_readConfig)
   old_libs=$LIBS
   LIBS="$LIBS $ECONF_LIBS"
+  saved_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $ECONF_CFLAGS"
   AC_LINK_IFELSE(
     [AC_LANG_PROGRAM(
       [[
@@ -599,6 +601,7 @@ if test "$WITH_ECONF" = "check" || test "$WITH_ECONF" = "yes"; then
   if test "$econf_readConfig" = yes; then
     ECONF_CFLAGS="$ECONF_CFLAGS -DHAVE_ECONF_READCONFIG"
   fi
+  CFLAGS=$saved_CFLAGS
   LIBS=$old_libs
 fi
 
